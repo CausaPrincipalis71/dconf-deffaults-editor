@@ -19,7 +19,7 @@ void MainWindow::getSchemasWithKeys()
     // Running command "gsettings list-schemas"
     QString program = "gsettings";
     QStringList arguments;
-    arguments.push_back("list-schemas");
+    arguments.push_back("list-recursively");
     gsettings = new QProcess();
     gsettings->start(program, arguments);
 
@@ -35,28 +35,34 @@ void MainWindow::on_GSettingsListSchemasFinished()
     auto schemasList = gsettingsOutput.split('\n');
     schemasList.removeLast(); // Last string is empty
 
+
     for(int i = 0; i < schemasList.size(); i++)
     {
-        schemasVector.push_back(new GSchema(schemasList[i]));
+        // Parsing expression like "org.gnome.desktop.media-handling autorun-x-content-start-app ['x-content/unix-software', 'x-content/ostree-repository']"
+        auto splittedString = schemasList[i].split(' ');
+        auto &schema = splittedString.at(0);
+        auto &key = splittedString.at(1);
+        QString value = splittedString.at(2);
+
+        for(int j = 3; j < splittedString.size(); j++)      // Cycle runs only if value of key contains space symbol
+        {
+            value.push_back(" ");
+            value.push_back(splittedString.at(j));
+        }
+
+        schemasVector.push_back(new GSchema(schema, key, value));
     }
 
     //Waiting for the vector to fill
-    QTimer::singleShot(400, this, &MainWindow::wholeKeysCreated);
+    QTimer::singleShot(5000, this, &MainWindow::wholeKeysCreated);
 }
 
 void MainWindow::wholeKeysCreated()
 {
-    for (auto i = schemasVector.begin(); i != schemasVector.end(); i++)
+    for (int i = 0; i < schemasVector.size(); i++)
     {
-        ui->plainTextEdit->appendPlainText((*i)->undividedSchema());
 
-        auto schemaKeys = (*i)->keysName();
-        for (auto j = schemaKeys.begin(); j != schemaKeys.end(); j++)
-        {
-            ui->plainTextEdit->appendPlainText(*j);
-        }
-
-        ui->plainTextEdit->appendPlainText("\n");
     }
+
 }
 

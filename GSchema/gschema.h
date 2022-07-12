@@ -13,22 +13,22 @@ class GSchema : public QObject
 Q_OBJECT
 
 public:
-    explicit GSchema(QString schema, QObject *parent = nullptr);
-
-    QStringList keysName();
+    explicit GSchema(QString schema, QString key, QString value, QObject *parent = nullptr);
 
     const QString &undividedSchema() const;
 
+    const QStringList &dividedSchema() const;
+
+    GKey *key() const;
+
 private:
-    QVector<GKey*> keysVector;   // Vector that contains keys, it`s value and description
+    GKey* m_key;                   // Object that contains keys, it`s value and description
 
     QString m_undividedSchema;
     QStringList m_dividedSchema;  // Schema name converted from "org.gnome.desktop.background" to splitted view "org" "gnome" "desktop" "background"
 
-    QProcess * gsettings;       // QProcess running gsettings
-
 private slots:
-    void on_GSettingsListKeysFinished();
+
 };
 
 #endif // GSCHEMA_H
