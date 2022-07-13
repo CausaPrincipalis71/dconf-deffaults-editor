@@ -59,10 +59,11 @@ void MainWindow::on_GSettingsListSchemasFinished()
 
 void MainWindow::wholeKeysCreated()
 {
-    for (int i = 0; i < schemasVector.size(); i++)
+    GSchema::createSchemasButtons();
+    auto &buttons = GSchema::schemasButtons();
+    for (int i = 0; i < buttons.size(); i++)
     {
-
+        ui->schemaButtonsScrollAreaContains->layout()->addWidget(buttons.at(i));
     }
-
 }
 

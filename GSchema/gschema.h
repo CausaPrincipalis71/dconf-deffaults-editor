@@ -3,7 +3,9 @@
 
 #include <QObject>
 #include <QVector>
+#include <QList>
 #include <QProcess>
+#include <QPushButton>
 #include "gkey.h"
 
 // A class containing a schema and its keys
@@ -15,17 +17,23 @@ Q_OBJECT
 public:
     explicit GSchema(QString schema, QString key, QString value, QObject *parent = nullptr);
 
-    const QString &undividedSchema() const;
+    static void createSchemasButtons();                 // Create button for each schemes
 
-    const QStringList &dividedSchema() const;
-
+    // Getters
     GKey *key() const;
 
-private:
-    GKey* m_key;                   // Object that contains keys, it`s value and description
+    static const QStringList &undividedSchemasList();
+    static const QList<QStringList> &dividedSchemasList();
+    static const QVector<QPushButton *> &schemasButtons();
 
-    QString m_undividedSchema;
-    QStringList m_dividedSchema;  // Schema name converted from "org.gnome.desktop.background" to splitted view "org" "gnome" "desktop" "background"
+private:
+    GKey* m_key;                                        // Object that contains keys, it`s value and description
+
+    // Requires access to information about all schemes from one object
+    static QStringList m_undividedSchemasList;
+    static QList<QStringList> m_dividedSchemasList;     // Schema name converted from "org.gnome.desktop.background" to splitted view "org" "gnome" "desktop" "background"
+    static QVector <QPushButton*> m_schemasButtons;     // Button that is used to select this scheme
+
 
 private slots:
 
