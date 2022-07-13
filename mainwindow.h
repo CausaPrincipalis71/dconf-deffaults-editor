@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QVector>
 #include <QTimer>
+#include <QStackedWidget>
 
 #include "GSchema/gschema.h"
 
@@ -25,13 +26,21 @@ private:
 
     QProcess * gsettings;
 
-    QVector<GSchema*> schemasVector;
+    QVector<GSchema*> schemeVector;
+    QVector<QPushButton*> schemeButtons;
 
-    void getSchemasWithKeys();                  //Get list of all schemas, keys and value with QProcess and GSettings
+    GSchema * currentSchema = nullptr;
+    QStackedWidget * keysButtonsWidget;
+
+    void getSchemeWithKeys();                  //Get list of all schemas, keys and value with QProcess and GSettings
 
 private slots:
-    void on_GSettingsListSchemasFinished();
+    void on_GSettingsListSchemeFinished();
+
+    void on_SchemaButtonClicked(int buttonNumber);
+    void on_keyButtonClicked(int buttonNumber);
 
     void wholeKeysCreated();                 // Activated after schemasVector is filled
+    void on_goBackPushButton_clicked();
 };
 #endif // MAINWINDOW_H

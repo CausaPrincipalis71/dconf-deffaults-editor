@@ -6,6 +6,8 @@
 #include <QList>
 #include <QProcess>
 #include <QPushButton>
+#include <QLayout>
+#include <QScrollArea>
 #include "gkey.h"
 
 // A class containing a schema and its keys
@@ -15,28 +17,33 @@ class GSchema : public QObject
 Q_OBJECT
 
 public:
-    explicit GSchema(QString schema, QString key, QString value, QObject *parent = nullptr);
-
-    static void createSchemasButtons();                 // Create button for each schemes
+    explicit GSchema(QString schema, QVector<QString> key, QVector<QString> value, QObject *parent = nullptr);
 
     // Getters
-    GKey *key() const;
+    const QVector<GKey *> &keys() const;
 
-    static const QStringList &undividedSchemasList();
-    static const QList<QStringList> &dividedSchemasList();
-    static const QVector<QPushButton *> &schemasButtons();
+    static const QStringList &undividedSchemeList();
+    static const QList<QStringList> &dividedSchemeList();
+
+    const QVector<QPushButton *> &keysButtons() const;
+
+    QScrollArea *keysButtonsWidget() const;
 
 private:
-    GKey* m_key;                                        // Object that contains keys, it`s value and description
+    QVector<GKey*> m_keys;                                        // Object that contains keys, it`s value and description
+    QVector<QPushButton*> m_keysButtons;                          // Button for each key
+
+    QScrollArea * m_keysButtonsWidget;
 
     // Requires access to information about all schemes from one object
-    static QStringList m_undividedSchemasList;
-    static QList<QStringList> m_dividedSchemasList;     // Schema name converted from "org.gnome.desktop.background" to splitted view "org" "gnome" "desktop" "background"
-    static QVector <QPushButton*> m_schemasButtons;     // Button that is used to select this scheme
+    static QStringList m_undividedSchemeList;
+    static QList<QStringList> m_dividedSchemeList;     // Schema name converted from "org.gnome.desktop.background" to splitted view "org" "gnome" "desktop" "background"
 
+signals:
+    void buttonClicked(int number);
 
 private slots:
-
+    void on_buttonClicked(int number);
 };
 
 #endif // GSCHEMA_H

@@ -23,9 +23,9 @@
       <widget class="QWidget" name="searchPage">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QLineEdit" name="searchLine">
+         <widget class="QLineEdit" name="schemaSearchLine">
           <property name="placeholderText">
-           <string>Введите текст для поиска</string>
+           <string>Введите текст для поиска схемы</string>
           </property>
          </widget>
         </item>
@@ -34,13 +34,13 @@
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="QWidget" name="schemaButtonsScrollAreaContains">
+          <widget class="QWidget" name="schemaButtonsScrollAreaContents">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
              <width>750</width>
-             <height>467</height>
+             <height>430</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3"/>
@@ -49,7 +49,27 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="editPage"/>
+      <widget class="QWidget" name="schemePage">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLineEdit" name="keySearchLine">
+          <property name="placeholderText">
+           <string>Введите текст для поиска ключа</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="goBackPushButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Назад</string>
+      </property>
      </widget>
     </item>
    </layout>
