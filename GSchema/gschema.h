@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QLayout>
 #include <QScrollArea>
+#include <QSpacerItem>
 #include "gkey.h"
 
 // A class containing a schema and its keys
@@ -26,6 +27,8 @@ public:
     static const QList<QStringList> &dividedSchemeList();
 
     const QVector<QPushButton *> &keysButtons() const;
+
+    const GKey * getKeyAt(int number) const;
 
     QScrollArea *keysButtonsWidget() const;
 

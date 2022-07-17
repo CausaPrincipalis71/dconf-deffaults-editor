@@ -9,6 +9,46 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     keysButtonsWidget = new QStackedWidget();
     ui->schemePage->layout()->addWidget(keysButtonsWidget);
+
+    // Check if user profile file exists, if not, create it and set the value
+    userProfile = new QFile("/etc/dconf/profile/user");
+    if(userProfile->exists() == 0)
+    {
+        userProfile->open(QIODevice::WriteOnly);
+
+        QTextStream out(userProfile);
+        out << "user-db:user" << Qt::endl << "system-db:local" << Qt::endl;
+
+        userProfile->close();
+        delete userProfile;
+    }
+    else
+    {
+        userProfile->open(QIODevice::ReadWrite);
+        auto fileData = userProfile->readAll();
+        QTextStream out(userProfile);
+
+        if(fileData.contains("user-db:user") == 0)
+        {
+            out << Qt::endl <<"user-db:user" << Qt::endl;
+        }
+
+        if(fileData.contains("system-db:local") == 0)
+        {
+            out << Qt::endl << "system-db:local" << Qt::endl;
+        }
+
+        userProfile->close();
+        delete userProfile;
+    }
+
+    // Checking if the database directory exists. If not, it creates the necessary directories.
+    if(dbDir->exists("local.d/locks") == 0)
+    {
+        dbDir->mkpath("local.d/locks");
+    }
+
+
 }
 
 MainWindow::~MainWindow()
@@ -27,6 +67,52 @@ void MainWindow::getSchemeWithKeys()
 
     // Waiting for finishing of process
     connect(gsettings, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &MainWindow::on_GSettingsListSchemeFinished);
+}
+
+void MainWindow::setKeyValueAsDefault(QString value)
+{
+    // Open file with name "00_*Schema Name*"
+    dbDefaultFile->setFileName(QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+    dbDefaultFile->open(QIODevice::ReadWrite);
+
+    // Read data from file
+    QString fileData = dbDefaultFile->readAll();
+
+    if(fileData.isEmpty())
+    {
+        // Convert from "org.gnome.calculator" to "org/gnome/calculator"
+        QString schemaName = GSchema::undividedSchemeList().at(currentSchemaNumber);
+        schemaName.replace(".", "/");
+        // File must start with the schema name
+        fileData.append("[" + schemaName + "]\n");
+    }
+
+    // If already some value is set to default
+    if(fileData.contains(currentKey->name()))
+    {
+        // Clear data and then rewrite
+        int i = fileData.indexOf(currentKey->name());
+        while(fileData.at(i) != "\n" && i < fileData.size())
+        {
+            fileData.remove(i);
+        }
+    }
+
+    fileData.append(currentKey->name() + "=" + value + "\r\n");
+
+    dbDefaultFile->close();
+    dbDefaultFile->remove();
+    dbDefaultFile->open(QIODevice::WriteOnly);
+
+    QTextStream out(dbDefaultFile);
+
+    dbDefaultFile->write(fileData.toStdString().data());
+
+    dbDefaultFile->close();
+
+    QMessageBox::information(this, tr("Успешное завершение"), "Параметру " + currentKey->name() + " присвоено значение " + value + " по умолчанию");
+
+    QProcess::execute("dconf", QStringList("update"));
 }
 
 void MainWindow::on_GSettingsListSchemeFinished()
@@ -84,18 +170,29 @@ void MainWindow::on_SchemaButtonClicked(int buttonNumber)
 
 
     currentSchema = schemeVector.at(buttonNumber);          // Setting actual schema
+    currentSchemaNumber = buttonNumber;
     auto &keysButtons = currentSchema->keysButtons();
 
     connect(currentSchema, &GSchema::buttonClicked, this, &MainWindow::on_keyButtonClicked);
 
     keysButtonsWidget->setCurrentIndex(buttonNumber);
+
+    ui->schemaName->setText(GSchema::undividedSchemeList().at(currentSchemaNumber));
+    ui->keyPage_schemaName->setText(GSchema::undividedSchemeList().at(currentSchemaNumber));
+
     ui->stackedWidget->setCurrentWidget(ui->schemePage);
     ui->goBackPushButton->setEnabled(true);
 }
 
 void MainWindow::on_keyButtonClicked(int buttonNumber)
 {
+    ui->stackedWidget->setCurrentWidget(ui->keyPage);
 
+    currentKey = currentSchema->getKeyAt(buttonNumber);
+
+    ui->currentKeyLabel->setText(currentKey->name());
+    ui->currentValue->setText(currentKey->value());
+    ui->keyDescription->setPlainText(currentKey->description());
 }
 
 void MainWindow::wholeKeysCreated()
@@ -117,5 +214,11 @@ void MainWindow::on_goBackPushButton_clicked()
     ui->stackedWidget->setCurrentIndex(ui->stackedWidget->currentIndex() - 1);
     if(ui->stackedWidget->currentIndex() == 0)
         ui->goBackPushButton->setEnabled(false);
+}
+
+
+void MainWindow::on_setCurrentValuesAsDefault_pushButton_clicked()
+{
+    setKeyValueAsDefault(currentKey->value());
 }
 

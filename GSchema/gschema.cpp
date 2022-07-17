@@ -11,6 +11,7 @@ GSchema::GSchema(QString schema, QVector<QString> keys, QVector<QString> values,
     if(!m_undividedSchemeList.contains(schema))                // Add a new schema if it doesn't already exist
         m_undividedSchemeList.push_back(schema);
 
+    // Create a scroll area for buttons
     m_keysButtonsWidget = new QScrollArea();
     m_keysButtonsWidget->setWidget(new QWidget);
     m_keysButtonsWidget->widget()->setLayout(new QVBoxLayout());
@@ -24,6 +25,8 @@ GSchema::GSchema(QString schema, QVector<QString> keys, QVector<QString> values,
         m_keysButtonsWidget->widget()->layout()->addWidget(m_keysButtons.at(i));
         connect(m_keysButtons.at(i), &QPushButton::clicked, this, [=]() {on_buttonClicked(i);});
     }
+
+    m_keysButtonsWidget->widget()->layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 void GSchema::on_buttonClicked(int number)
@@ -44,6 +47,11 @@ const QList<QStringList> &GSchema::dividedSchemeList()
 const QVector<QPushButton *> &GSchema::keysButtons() const
 {
     return m_keysButtons;
+}
+
+const GKey *GSchema::getKeyAt(int number) const
+{
+    return m_keys.at(number);
 }
 
 QScrollArea *GSchema::keysButtonsWidget() const

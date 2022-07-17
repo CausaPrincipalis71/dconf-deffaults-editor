@@ -9,11 +9,13 @@
 
 class GKey : public QObject
 {
-Q_OBJECT
+Q_OBJECT 
 
 public:
     explicit GKey(const QString &name, const QString &description, const QString &value, const QString &range, QObject * parent = nullptr);
     explicit GKey(const QString &name, const QString &schema, const QString &value, QObject * parent = nullptr);
+
+    enum type {NUMBER, ARRAY, STRING, BOOL, ENUM};
 
     const QString &description() const;
 
@@ -21,11 +23,16 @@ public:
 
     const QString &name() const;
 
+    const enum type type() const;
+
 private:
     QString m_name;
     QString m_description;
     QString m_value;
     QString m_range;
+    enum type m_type;
+
+    QStringList enumAvailableOptions;
 
     QProcess * gsettingsDescribe;           // QProcess running gsettings describe
     QProcess * gsettingsRange;              // QPRocess running gsettings range

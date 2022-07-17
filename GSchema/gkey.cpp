@@ -49,6 +49,11 @@ const QString &GKey::name() const
     return m_name;
 }
 
+const enum GKey::type GKey::type() const
+{
+    return m_type;
+}
+
 void GKey::GSettingsDescribeCommandFinished()
 {
     QByteArray gsettingsOutput = gsettingsDescribe->readAllStandardOutput();
@@ -65,6 +70,26 @@ void GKey::GSettingsRangeCommandFinished()
     QByteArray gsettingsOutput = gsettingsRange->readAllStandardOutput();
 
     this->m_range = gsettingsOutput.split('\n').at(0);                  // Split command is used to remove multiline values;
+
+    if(m_range == "type i")
+        m_type = NUMBER;
+    else if(m_range == "type(ii)")
+        m_type = ARRAY;
+    else if(m_range == "type b")
+        m_type = BOOL;
+    else if(m_range == "type s")
+        m_type = STRING;
+    else if(m_range == "enum")
+    {
+        m_type = ENUM;
+
+        auto gsettingsSplittedOutput = gsettingsOutput.split('\n');
+
+        for(int i = 1; i < gsettingsSplittedOutput.size() - 1; i++)
+        {
+            enumAvailableOptions.push_back(gsettingsSplittedOutput.at(i));
+        }
+    }
 
     disconnect(gsettingsRange, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &GKey::GSettingsRangeCommandFinished);
     delete gsettingsRange;

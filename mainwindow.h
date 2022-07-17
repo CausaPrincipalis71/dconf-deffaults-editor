@@ -6,6 +6,10 @@
 #include <QVector>
 #include <QTimer>
 #include <QStackedWidget>
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
+#include <QMessageBox>
 
 #include "GSchema/gschema.h"
 
@@ -30,9 +34,19 @@ private:
     QVector<QPushButton*> schemeButtons;
 
     GSchema * currentSchema = nullptr;
+    int currentSchemaNumber;
+
+    GKey const * currentKey = nullptr;
     QStackedWidget * keysButtonsWidget;
 
+    QFile * userProfile;
+    QFile * dbDefaultFile = new QFile();
+    QFile * dbLockFile = new QFile();
+    QDir * dbDir = new QDir("/etc/dconf/db/");
+
     void getSchemeWithKeys();                  //Get list of all schemas, keys and value with QProcess and GSettings
+
+    void setKeyValueAsDefault(QString value);
 
 private slots:
     void on_GSettingsListSchemeFinished();
@@ -42,5 +56,6 @@ private slots:
 
     void wholeKeysCreated();                 // Activated after schemasVector is filled
     void on_goBackPushButton_clicked();
+    void on_setCurrentValuesAsDefault_pushButton_clicked();
 };
 #endif // MAINWINDOW_H
