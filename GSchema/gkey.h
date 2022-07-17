@@ -15,7 +15,7 @@ public:
     explicit GKey(const QString &name, const QString &description, const QString &value, const QString &range, QObject * parent = nullptr);
     explicit GKey(const QString &name, const QString &schema, const QString &value, QObject * parent = nullptr);
 
-    enum type {NUMBER, ARRAY, STRING, BOOL, ENUM};
+    enum type {NUMBER, DOUBLE, STRING, BOOL, ENUM};
 
     const QString &description() const;
 
@@ -25,6 +25,8 @@ public:
 
     const enum type type() const;
 
+    const QStringList &enumAvailableOptions() const;
+
 private:
     QString m_name;
     QString m_description;
@@ -32,7 +34,7 @@ private:
     QString m_range;
     enum type m_type;
 
-    QStringList enumAvailableOptions;
+    QStringList m_enumAvailableOptions;
 
     QProcess * gsettingsDescribe;           // QProcess running gsettings describe
     QProcess * gsettingsRange;              // QPRocess running gsettings range

@@ -69,10 +69,10 @@ void MainWindow::getSchemeWithKeys()
     connect(gsettings, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &MainWindow::on_GSettingsListSchemeFinished);
 }
 
-void MainWindow::setKeyValueAsDefault(QString value)
+void MainWindow::setKeyValueAsDefault(QString value, QString file)
 {
     // Open file with name "00_*Schema Name*"
-    dbDefaultFile->setFileName(QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+    dbDefaultFile->setFileName(file);
     dbDefaultFile->open(QIODevice::ReadWrite);
 
     // Read data from file
@@ -109,10 +109,6 @@ void MainWindow::setKeyValueAsDefault(QString value)
     dbDefaultFile->write(fileData.toStdString().data());
 
     dbDefaultFile->close();
-
-    QMessageBox::information(this, tr("Успешное завершение"), "Параметру " + currentKey->name() + " присвоено значение " + value + " по умолчанию");
-
-    QProcess::execute("dconf", QStringList("update"));
 }
 
 void MainWindow::on_GSettingsListSchemeFinished()
@@ -193,6 +189,45 @@ void MainWindow::on_keyButtonClicked(int buttonNumber)
     ui->currentKeyLabel->setText(currentKey->name());
     ui->currentValue->setText(currentKey->value());
     ui->keyDescription->setPlainText(currentKey->description());
+
+    if(currentKey->type() == GKey::NUMBER)
+    {
+        ui->keyValue_spinBox->show();
+        ui->keyValue_spinBox->setValue(currentKey->value().toFloat());
+
+        ui->keyValue_lineEdit->hide();
+        ui->keyValue_comboBox->hide();
+        ui->keyValue_doubleSpinBox->hide();
+    }
+    else if(currentKey->type() == GKey::DOUBLE)
+    {
+        ui->keyValue_doubleSpinBox->show();
+        ui->keyValue_doubleSpinBox->setValue(currentKey->value().toFloat());
+
+        ui->keyValue_lineEdit->hide();
+        ui->keyValue_comboBox->hide();
+        ui->keyValue_spinBox->hide();
+    }
+    else if(currentKey->type() == GKey::ENUM || currentKey->type() == GKey::BOOL)
+    {
+        ui->keyValue_comboBox->show();
+        ui->keyValue_comboBox->clear();
+        ui->keyValue_comboBox->addItems(currentKey->enumAvailableOptions());
+        ui->keyValue_comboBox->setCurrentText(currentKey->value());
+
+        ui->keyValue_lineEdit->hide();
+        ui->keyValue_doubleSpinBox->hide();
+        ui->keyValue_spinBox->hide();
+    }
+    else
+    {
+        ui->keyValue_lineEdit->show();
+        ui->keyValue_lineEdit->setText(currentKey->value());
+
+        ui->keyValue_comboBox->hide();
+        ui->keyValue_doubleSpinBox->hide();
+        ui->keyValue_spinBox->hide();
+    }
 }
 
 void MainWindow::wholeKeysCreated()
@@ -216,9 +251,52 @@ void MainWindow::on_goBackPushButton_clicked()
         ui->goBackPushButton->setEnabled(false);
 }
 
+QString MainWindow::readKeyValue()
+{
+    QString value;
+
+    if(currentKey->type() == GKey::NUMBER)
+    {
+        value = QString::number(ui->keyValue_spinBox->value());
+    }
+    else if(currentKey->type() == GKey::DOUBLE)
+    {
+        value = QString::number(ui->keyValue_doubleSpinBox->value());
+    }
+    else if(currentKey->type() == GKey::ENUM || currentKey->type() == GKey::BOOL)
+    {
+        value = ui->keyValue_comboBox->currentText();
+    }
+    else
+    {
+        value = ui->keyValue_lineEdit->text();
+    }
+
+    return value;
+}
 
 void MainWindow::on_setCurrentValuesAsDefault_pushButton_clicked()
 {
-    setKeyValueAsDefault(currentKey->value());
+    QString value = readKeyValue();
+
+    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+
+    QProcess::execute("dconf", QStringList("update"));
+
+    QMessageBox::information(this, tr("Успешное завершение"), "Параметру " + currentKey->name() + " присвоено значение " + value + " по умолчанию");
+}
+
+
+void MainWindow::on_fixCurrentValueAsDefaulr_pushbutton_clicked()
+{
+    QString value = readKeyValue();
+
+    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/locks/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+
+    QProcess::execute("dconf", QStringList("update"));
+
+    QMessageBox::information(this, tr("Успешное завершение"), "Параметру " + currentKey->name() + " зафиксировано значение " + value + " по умолчанию");
+
 }
 

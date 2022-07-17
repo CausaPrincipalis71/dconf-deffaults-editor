@@ -54,6 +54,11 @@ const enum GKey::type GKey::type() const
     return m_type;
 }
 
+const QStringList &GKey::enumAvailableOptions() const
+{
+    return m_enumAvailableOptions;
+}
+
 void GKey::GSettingsDescribeCommandFinished()
 {
     QByteArray gsettingsOutput = gsettingsDescribe->readAllStandardOutput();
@@ -73,12 +78,14 @@ void GKey::GSettingsRangeCommandFinished()
 
     if(m_range == "type i")
         m_type = NUMBER;
-    else if(m_range == "type(ii)")
-        m_type = ARRAY;
+    else if(m_range == "type d")
+        m_type = DOUBLE;
     else if(m_range == "type b")
+    {
         m_type = BOOL;
-    else if(m_range == "type s")
-        m_type = STRING;
+        m_enumAvailableOptions.push_back("true");
+        m_enumAvailableOptions.push_back("false");
+    }
     else if(m_range == "enum")
     {
         m_type = ENUM;
@@ -87,9 +94,11 @@ void GKey::GSettingsRangeCommandFinished()
 
         for(int i = 1; i < gsettingsSplittedOutput.size() - 1; i++)
         {
-            enumAvailableOptions.push_back(gsettingsSplittedOutput.at(i));
+            m_enumAvailableOptions.push_back(gsettingsSplittedOutput.at(i));
         }
     }
+    else
+        m_type = STRING;
 
     disconnect(gsettingsRange, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &GKey::GSettingsRangeCommandFinished);
     delete gsettingsRange;

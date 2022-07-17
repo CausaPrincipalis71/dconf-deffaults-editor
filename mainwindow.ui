@@ -183,9 +183,74 @@
          </spacer>
         </item>
         <item>
+         <widget class="QWidget" name="widget_2" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Значение</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="keyValue_spinBox">
+             <property name="minimum">
+              <number>-2147483647</number>
+             </property>
+             <property name="maximum">
+              <number>2147483647</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="keyValue_doubleSpinBox">
+             <property name="minimum">
+              <double>-2147483647.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>2147483647.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="keyValue_lineEdit"/>
+           </item>
+           <item>
+            <widget class="QComboBox" name="keyValue_comboBox"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="setCurrentValuesAsDefault_pushButton">
           <property name="text">
-           <string>Задать текущее значение как значение по умолчанию</string>
+           <string>Задать значение по умолчанию</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="fixCurrentValueAsDefaulr_pushbutton">
+          <property name="text">
+           <string>Зафиксировать значение по умолчанию</string>
           </property>
          </widget>
         </item>
