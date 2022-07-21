@@ -32,11 +32,15 @@ public:
 
     QScrollArea *keysButtonsWidget() const;
 
+    const QString &name() const;
+
 private:
     QVector<GKey*> m_keys;                                        // Object that contains keys, it`s value and description
     QVector<QPushButton*> m_keysButtons;                          // Button for each key
 
     QScrollArea * m_keysButtonsWidget;
+
+    QString m_name;                                               // Name of schema
 
     // Requires access to information about all schemes from one object
     static QStringList m_undividedSchemeList;

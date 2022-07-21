@@ -47,7 +47,7 @@ private:
     void getSchemeWithKeys();                  //Get list of all schemas, keys and value with QProcess and GSettings
 
     QString readKeyValue();
-    void setKeyValueAsDefault(QString value, QString file);
+    void writeKeyValueToFile(QString value, QString file);
 
 private slots:
     void on_GSettingsListSchemeFinished();
@@ -56,8 +56,13 @@ private slots:
     void on_keyButtonClicked(int buttonNumber);
 
     void wholeKeysCreated();                 // Activated after schemasVector is filled
+
     void on_goBackPushButton_clicked();
     void on_setCurrentValuesAsDefault_pushButton_clicked();
     void on_fixCurrentValueAsDefaulr_pushbutton_clicked();
+    void on_schemaSearchLine_textChanged(const QString &arg1);
+    void on_keySearchLine_textChanged(const QString &arg1);
+    void on_setSchemaAsDefault_pushButton_clicked();
+    void on_fixSchemaValue_pushButton_clicked();
 };
 #endif // MAINWINDOW_H

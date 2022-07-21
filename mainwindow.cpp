@@ -69,7 +69,7 @@ void MainWindow::getSchemeWithKeys()
     connect(gsettings, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &MainWindow::on_GSettingsListSchemeFinished);
 }
 
-void MainWindow::setKeyValueAsDefault(QString value, QString file)
+void MainWindow::writeKeyValueToFile(QString value, QString file)
 {
     // Open file with name "00_*Schema Name*"
     dbDefaultFile->setFileName(file);
@@ -81,7 +81,7 @@ void MainWindow::setKeyValueAsDefault(QString value, QString file)
     if(fileData.isEmpty())
     {
         // Convert from "org.gnome.calculator" to "org/gnome/calculator"
-        QString schemaName = GSchema::undividedSchemeList().at(currentSchemaNumber);
+        QString schemaName = currentSchema->name();
         schemaName.replace(".", "/");
         // File must start with the schema name
         fileData.append("[" + schemaName + "]\n");
@@ -173,8 +173,10 @@ void MainWindow::on_SchemaButtonClicked(int buttonNumber)
 
     keysButtonsWidget->setCurrentIndex(buttonNumber);
 
-    ui->schemaName->setText(GSchema::undividedSchemeList().at(currentSchemaNumber));
-    ui->keyPage_schemaName->setText(GSchema::undividedSchemeList().at(currentSchemaNumber));
+    ui->schemaName->setText(currentSchema->name());
+    ui->keyPage_schemaName->setText(currentSchema->name());
+
+    ui->schemaSearchLine->clear();
 
     ui->stackedWidget->setCurrentWidget(ui->schemePage);
     ui->goBackPushButton->setEnabled(true);
@@ -183,6 +185,8 @@ void MainWindow::on_SchemaButtonClicked(int buttonNumber)
 void MainWindow::on_keyButtonClicked(int buttonNumber)
 {
     ui->stackedWidget->setCurrentWidget(ui->keyPage);
+
+    ui->keySearchLine->clear();
 
     currentKey = currentSchema->getKeyAt(buttonNumber);
 
@@ -242,6 +246,8 @@ void MainWindow::wholeKeysCreated()
         // Adding layout with keys buttons to stacked layout
         keysButtonsWidget->addWidget(schemeVector.at(i)->keysButtonsWidget());
     }
+
+    ui->schemaButtonsScrollAreaContents->layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 }
 
 void MainWindow::on_goBackPushButton_clicked()
@@ -279,7 +285,7 @@ void MainWindow::on_setCurrentValuesAsDefault_pushButton_clicked()
 {
     QString value = readKeyValue();
 
-    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
@@ -291,12 +297,82 @@ void MainWindow::on_fixCurrentValueAsDefaulr_pushbutton_clicked()
 {
     QString value = readKeyValue();
 
-    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
-    setKeyValueAsDefault(value, QString("/etc/dconf/db/local.d/locks/00_") + GSchema::undividedSchemeList().at(currentSchemaNumber));
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
     QMessageBox::information(this, tr("Успешное завершение"), "Параметру " + currentKey->name() + " зафиксировано значение " + value + " по умолчанию");
+
+}
+
+
+void MainWindow::on_schemaSearchLine_textChanged(const QString &arg1)
+{
+    // Show only buttons containing search text
+    for (int i = 0; i < schemeButtons.size(); i++)
+    {
+        if(schemeButtons.at(i)->text().contains(arg1))
+        {
+            schemeButtons.at(i)->show();
+        }
+        else
+        {
+            schemeButtons.at(i)->hide();
+        }
+    }
+}
+
+
+void MainWindow::on_keySearchLine_textChanged(const QString &arg1)
+{
+    for (int i = 0; i < currentSchema->keysButtons().size(); i++)
+    {
+        if(currentSchema->keysButtons().at(i)->text().contains(arg1))
+        {
+            currentSchema->keysButtons().at(i)->show();
+        }
+        else
+        {
+            currentSchema->keysButtons().at(i)->hide();
+        }
+    }
+}
+
+
+void MainWindow::on_setSchemaAsDefault_pushButton_clicked()
+{
+    for(int i = 0; i < currentSchema->keys().size(); i++)
+    {
+        currentKey = currentSchema->keys().at(i);
+
+        writeKeyValueToFile(currentKey->value(), QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
+    }
+
+    currentKey = nullptr;
+
+    QProcess::execute("dconf", QStringList("update"));
+
+    QMessageBox::information(this, tr("Успешное завершение"), "Параметрам схемы " + currentSchema->name() + " задано значение по умолчанию");
+
+}
+
+
+void MainWindow::on_fixSchemaValue_pushButton_clicked()
+{
+    for(int i = 0; i < currentSchema->keys().size(); i++)
+    {
+        currentKey = currentSchema->keys().at(i);
+
+        writeKeyValueToFile(currentKey->value(), QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
+        writeKeyValueToFile(currentKey->value(), QString("/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
+    }
+
+    currentKey = nullptr;
+
+    QProcess::execute("dconf", QStringList("update"));
+
+    QMessageBox::information(this, tr("Успешное завершение"), "Параметрам схемы " + currentSchema->name() + " зафиксированы значения по умолчанию");
 
 }
 
