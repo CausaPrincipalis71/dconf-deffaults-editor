@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->schemePage->layout()->addWidget(keysButtonsWidget);
 
     // Check if user profile file exists, if not, create it and set the value
-    userProfile = new QFile("/tmp/etc/dconf/profile/user");
+    userProfile = new QFile("/etc/dconf/profile/user");
     if(userProfile->exists() == 0)
     {
         userProfile->open(QIODevice::WriteOnly);
@@ -289,7 +289,7 @@ void MainWindow::on_setCurrentValuesAsDefault_pushButton_clicked()
 {
     QString value = readKeyValue();
 
-    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
@@ -301,8 +301,8 @@ void MainWindow::on_fixCurrentValueAsDefaulr_pushbutton_clicked()
 {
     QString value = readKeyValue();
 
-    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/00_") + currentSchema->name());
-    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
