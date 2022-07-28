@@ -42,7 +42,7 @@ private:
     QFile * userProfile;
     QFile * dbDefaultFile = new QFile();
     QFile * dbLockFile = new QFile();
-    QDir * dbDir = new QDir("/etc/dconf/db/");
+    QDir * dbDir = new QDir("/tmp/etc/dconf/db/");
 
     void getSchemeWithKeys();                  //Get list of all schemas, keys and value with QProcess and GSettings
 

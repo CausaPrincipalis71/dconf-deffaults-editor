@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->schemePage->layout()->addWidget(keysButtonsWidget);
 
     // Check if user profile file exists, if not, create it and set the value
-    userProfile = new QFile("/etc/dconf/profile/user");
+    userProfile = new QFile("/tmp/etc/dconf/profile/user");
     if(userProfile->exists() == 0)
     {
         userProfile->open(QIODevice::WriteOnly);
@@ -78,33 +78,37 @@ void MainWindow::writeKeyValueToFile(QString value, QString file)
     // Read data from file
     QString fileData = dbDefaultFile->readAll();
 
-    if(fileData.isEmpty())
+    // Convert from "org.gnome.calculator" to "org/gnome/calculator"
+    QString schemaName = currentSchema->name();
+    schemaName.replace(".", "/");
+
+    if(fileData.isEmpty() || fileData.contains(schemaName) == 0)
     {
-        // Convert from "org.gnome.calculator" to "org/gnome/calculator"
-        QString schemaName = currentSchema->name();
-        schemaName.replace(".", "/");
+        fileData.clear();
         // File must start with the schema name
         fileData.append("[" + schemaName + "]\n");
     }
 
     // If already some value is set to default
-    if(fileData.contains(currentKey->name()))
+    while(fileData.contains(currentKey->name()))
     {
         // Clear data and then rewrite
         int i = fileData.indexOf(currentKey->name());
         while(fileData.at(i) != "\n" && i < fileData.size())
         {
-            fileData.remove(i);
+            fileData.remove(i, 1);
+        }
+        if(fileData.at(i) == '\n')     // removing '\n' at the end of the line
+        {
+            fileData.remove(i, 1);
         }
     }
 
-    fileData.append(currentKey->name() + "=" + value + "\r\n");
+    fileData.append(currentKey->name() + "=" + value + "\n");
 
     dbDefaultFile->close();
     dbDefaultFile->remove();
     dbDefaultFile->open(QIODevice::WriteOnly);
-
-    QTextStream out(dbDefaultFile);
 
     dbDefaultFile->write(fileData.toStdString().data());
 
@@ -285,7 +289,7 @@ void MainWindow::on_setCurrentValuesAsDefault_pushButton_clicked()
 {
     QString value = readKeyValue();
 
-    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
@@ -297,8 +301,8 @@ void MainWindow::on_fixCurrentValueAsDefaulr_pushbutton_clicked()
 {
     QString value = readKeyValue();
 
-    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/00_") + currentSchema->name());
-    writeKeyValueToFile(value, QString("/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/00_") + currentSchema->name());
+    writeKeyValueToFile(value, QString("/tmp/etc/dconf/db/local.d/locks/00_") + currentSchema->name());
 
     QProcess::execute("dconf", QStringList("update"));
 
