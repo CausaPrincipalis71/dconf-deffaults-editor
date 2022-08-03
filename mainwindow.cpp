@@ -94,7 +94,7 @@ void MainWindow::writeKeyValueToFile(QString value, QString file)
     {
         // Clear data and then rewrite
         int i = fileData.indexOf(currentKey->name());
-        while(fileData.at(i) != "\n" && i < fileData.size())
+        while(fileData.at(i) != '\n' && i < fileData.size())
         {
             fileData.remove(i, 1);
         }
@@ -104,7 +104,7 @@ void MainWindow::writeKeyValueToFile(QString value, QString file)
         }
     }
 
-    fileData.append(currentKey->name() + "=" + value + "\n");
+    fileData.append(currentKey->name() + "=" + value + '\n');
 
     dbDefaultFile->close();
     dbDefaultFile->remove();
