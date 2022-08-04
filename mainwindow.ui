@@ -10,6 +10,12 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>DejaVu Sans</family>
+    <pointsize>13</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Установка настроек по умолчанию</string>
   </property>
@@ -40,7 +46,7 @@
              <x>0</x>
              <y>0</y>
              <width>750</width>
-             <height>430</height>
+             <height>394</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3"/>
@@ -322,7 +328,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>33</height>
     </rect>
    </property>
   </widget>
